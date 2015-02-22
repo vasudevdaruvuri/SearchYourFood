@@ -7,8 +7,8 @@ Run Instructions: Run the following command in the command line to start the ser
 
 python <path>/searchurfood.py
 
-Inputs :http://localhost:8080/scrap?st="Food Item you would like to Search"&gl="Location of Search"%27&p="No of pages"
-Ex     : http://localhost:8080/scrap?st=chicken&gl=cincinnati%27&p=2
+Inputs :http://localhost:8080/scrap?fi="Food Item you would like to Search"&gl="Location of Search"%27&p="No of pages"
+Ex     : http://localhost:8080/scrap?fi=chicken&gl=cincinnati%27&p=2
 
 Output : you will get the data in Json format on your web browser 
 """
@@ -23,30 +23,17 @@ import re
 import requests
 
 
-PORT_NUMBER = 8080
+PORT_NUMBER = 8020
 
 #build the urls for individual selection and page numbers
 def get_url_build(base_url,limit):
 
-   """ 
-   cols = {'Business_Name'  : [],
-           'Street_Address' : [],
-           'Locality'       : [],
-           'Region'         : [],
-           'Zipcode'        : [],
-           'Contact'        : [],
-           'Website'        : [],
-           'Ratings'        : []
-           }
-   """            
-
-   #initialisation() 
+   #initialisation()
    for i in range(1,limit + 1): 
    		url1 = base_url + '&page=' + str(i) 
    		print 'processing:', url1  
    		soup = get_url_parsed(url1)
    		data = get_url_data(soup)
-   		
 
    return data
  
@@ -113,8 +100,10 @@ def get_url_data(soup):
       try : 
          classes = item.contents[1].find('div', {'class':"result-rating"})
          rating  = (classes.get('class')[1] + ' ' + classes.get('class')[2]).strip()
+         #print 'rating',rating
          for key, value in number.items():
             if  key == rating :
+             #print value
              cols['Ratings'].append(value)
                   
       except :
@@ -130,7 +119,7 @@ class myHandler(BaseHTTPRequestHandler):
 	#Handler for the GET requests
   def do_GET(self):
    
-   if self.path.startswith("/scrap"):
+   if self.path.startswith("/scrape"):
       o = urlparse.urlparse(self.path)
       getvars = urlparse.parse_qs(o.query)
       try:
@@ -142,7 +131,7 @@ class myHandler(BaseHTTPRequestHandler):
         search_term  = str( getvars['fi'][0]) # input Food item to search 
         geo_location = str( getvars['gl'][0]) # input loaction to search
         num_pages    = int( getvars['p'][0])  # input number of pages to scrap
-      
+
       	base_url = 'http://www.yellowpages.com/search?search_terms='#pizza&geo_location_terms=los'
         base_url = base_url + search_term + '&geo_location_terms=' + geo_location 
         print base_url
@@ -154,42 +143,43 @@ class myHandler(BaseHTTPRequestHandler):
         e = sys.exc_info()[0]
         self.send_error(404,'Error, provide a and b parameters' + str(e) + str(getvars.keys()))
         return
-                  
-                    
+
+
 if __name__ == "__main__":
-  try:
-	  #Create a web server and define the handler to manage the
-	  #incoming request
-	  server = HTTPServer(('', PORT_NUMBER), myHandler)
-	  print 'Started httpserver on port ' , PORT_NUMBER
-	  
-    #Wait forever for incoming http requests
-	  # Intitialisation of python dictionaries
-    number = {'one':1,
-                'one half':1.5, 
-                'two':2,
-                'two half':2.5,
-                'three':3,
-                'three half':3.5,
-                'four':4,
-                'four half':4.5,
-                'five':5,
-                'five half':5.5} 
+    try:
+        # Create a web server and define the handler to manage the
+        # incoming request
+        server = HTTPServer(('', PORT_NUMBER), myHandler)
+        print 'Started httpserver on port ', PORT_NUMBER
 
+        #Wait forever for incoming http requests
+        #Intitialisation of python dictionaries
 
-	  cols = {'Business_Name'  : [],
-              'Street_Address' : [],
-              'Locality'       : [],
-              'Region'         : [],
-              'Zipcode'        : [],
-              'Contact'        : [],
-              'Website'        : [],
-              'Ratings'        : []
-             }
-      #print cols
+        cols = {'Business_Name': [],
+                'Street_Address': [],
+                'Locality': [],
+                'Region': [],
+                'Zipcode': [],
+                'Contact': [],
+                'Website': [],
+                'Ratings': []
+        }
 
-	  server.serve_forever()
+        number = {'one': 1,
+                  'one half': 1.5,
+                  'two': 2,
+                  'two half': 2.5,
+                  'three': 3,
+                  'three half': 3.5,
+                  'four': 4,
+                  'four half': 4.5,
+                  'five': 5,
+                  'five half': 5.5}
+        #print cols
 
-  except KeyboardInterrupt:
-	  print '^C received, shutting down the web server'
-	  server.socket.close()
+        server.serve_forever()
+
+    except KeyboardInterrupt:
+        print '^C received, shutting down the web server'
+    server.socket.close()
+
