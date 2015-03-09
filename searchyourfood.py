@@ -20,12 +20,12 @@ import sys
 import urllib2 as url 
 import bs4
 import re
-import requests
+#import requests
 
 
 PORT_NUMBER = 8020
 
-#build the urls for individual selection and page numbers
+#build the urls for individual selecgion and page numbers
 def get_url_build(base_url,limit):
 
    #initialisation()
@@ -141,7 +141,7 @@ class myHandler(BaseHTTPRequestHandler):
     	return
       except:
         e = sys.exc_info()[0]
-        self.send_error(404,'Error, provide a and b parameters' + str(e) + str(getvars.keys()))
+        self.send_error(404,'Error, provide fi: Food Item, gl : geolocation, p: No of pages correctly ' + str(e) + str(getvars.keys()))
         return
 
 
